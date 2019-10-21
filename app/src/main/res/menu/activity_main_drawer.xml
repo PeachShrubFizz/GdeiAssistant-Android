@@ -58,10 +58,6 @@
                 android:id="@+id/about"
                 android:icon="@drawable/ic_about_black_24dp"
                 android:title="关于软件" />
-            <item
-                android:id="@+id/update"
-                android:icon="@drawable/ic_system_update_black_24dp"
-                android:title="检查更新" />
         </menu>
     </item>
 

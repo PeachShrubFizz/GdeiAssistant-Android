@@ -1,15 +1,10 @@
 package edu.gdei.gdeiassistant.Presenter;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.view.inputmethod.InputMethodManager;
-
-import com.taobao.sophix.SophixManager;
 
 import java.lang.ref.WeakReference;
 
@@ -17,15 +12,12 @@ import edu.gdei.gdeiassistant.Activity.LoginActivity;
 import edu.gdei.gdeiassistant.Activity.MainActivity;
 import edu.gdei.gdeiassistant.Activity.WebViewActivity;
 import edu.gdei.gdeiassistant.Application.GdeiAssistantApplication;
-import edu.gdei.gdeiassistant.Constant.ActivityRequestCodeConstant;
 import edu.gdei.gdeiassistant.Constant.RequestConstant;
 import edu.gdei.gdeiassistant.Model.LoginModel;
 import edu.gdei.gdeiassistant.Tools.StringUtils;
 import edu.gdei.gdeiassistant.Tools.TokenUtils;
 
 public class LoginPresenter {
-
-    private BroadcastReceiver receiver;
 
     private LoginActivity loginActivity;
 
@@ -38,18 +30,6 @@ public class LoginPresenter {
      */
     public void RemoveCallBacksAndMessages() {
         loginActivityHandler.removeCallbacksAndMessages(null);
-    }
-
-    /**
-     * 下载新版本
-     */
-    public void DownLoadNewVersion(String downloadURL) {
-        //使用浏览器下载新版本应用，并接收返回结果
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.VIEW");
-        intent.setData(Uri.parse(downloadURL));
-        intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-        loginActivity.startActivityForResult(Intent.createChooser(intent, "请选择浏览器"), ActivityRequestCodeConstant.BROWSER_UPDATE_REQUEST_CODE);
     }
 
     private static class LoginActivityHandler extends Handler {
@@ -129,50 +109,6 @@ public class LoginPresenter {
         this.loginActivity = loginActivity;
         this.loginModel = new LoginModel();
         this.loginActivityHandler = new LoginActivityHandler(loginActivity);
-        Init();
-    }
-
-    private void Init() {
-        //注册监听广播
-        if (receiver == null) {
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction() != null) {
-                        if (intent.getAction().equals("edu.gdei.gdeiassistant.PATCH_RELAUNCH")) {
-                            //显示补丁冷启动提示
-                            loginActivity.ShowPatchRelaunchTip();
-                        } else if (intent.getAction().equals("edu.gdei.gdeiassistant.CHECK_UPGRADE")) {
-                            String versionCodeName = intent.getStringExtra("VersionCodeName");
-                            String versionInfo = intent.getStringExtra("VersionInfo");
-                            String downloadURL = intent.getStringExtra("DownloadURL");
-                            String fileSize = intent.getStringExtra("FileSize");
-                            //显示更新提示
-                            loginActivity.ShowUpgradeTip(versionCodeName, versionInfo, downloadURL, fileSize);
-                        }
-                    }
-                }
-            };
-            //注册广播监听
-            loginActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.PATCH_RELAUNCH"));
-            loginActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.CHECK_UPGRADE"));
-        }
-    }
-
-    /**
-     * 注销广播
-     */
-    public void UnregisterReceiver() {
-        if (receiver != null) {
-            loginActivity.unregisterReceiver(receiver);
-        }
-    }
-
-    /**
-     * 结束应用程序使补丁生效
-     */
-    public void PatchRelaunchAndStopProcess() {
-        SophixManager.getInstance().killProcessSafely();
     }
 
     /**

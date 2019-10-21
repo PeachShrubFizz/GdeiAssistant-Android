@@ -1,10 +1,8 @@
 package edu.gdei.gdeiassistant.Presenter;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -17,8 +15,6 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
-
-import com.taobao.sophix.SophixManager;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -35,7 +31,6 @@ import edu.gdei.gdeiassistant.Model.BitmapFileModel;
 import edu.gdei.gdeiassistant.Model.MainModel;
 import edu.gdei.gdeiassistant.Pojo.Entity.Access;
 import edu.gdei.gdeiassistant.Pojo.Entity.Profile;
-import edu.gdei.gdeiassistant.Service.UpgradeService;
 import edu.gdei.gdeiassistant.Tools.TokenUtils;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -43,8 +38,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 public class MainPresenter {
-
-    private BroadcastReceiver receiver;
 
     private MainActivity mainActivity;
 
@@ -59,40 +52,6 @@ public class MainPresenter {
      */
     public void RemoveCallBacksAndMessages() {
         mainActivityHandler.removeCallbacksAndMessages(null);
-    }
-
-    /**
-     * 注销广播
-     */
-    public void UnregisterReceiver() {
-        if (receiver != null) {
-            mainActivity.unregisterReceiver(receiver);
-        }
-    }
-
-    /**
-     * 下载新版本
-     *
-     * @param downloadURL
-     */
-    public void DownLoadNewVersion(String downloadURL) {
-        //使用浏览器下载新版本应用，并接收返回结果
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.VIEW");
-        intent.setData(Uri.parse(downloadURL));
-        intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-        mainActivity.startActivityForResult(Intent.createChooser(intent, "请选择浏览器"), ActivityRequestCodeConstant.BROWSER_UPDATE_REQUEST_CODE);
-    }
-
-    /**
-     * 检查软件更新
-     */
-    public void CheckUpgrade() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mainActivity.startForegroundService(new Intent(mainActivity, UpgradeService.class));
-        } else {
-            mainActivity.startService(new Intent(mainActivity, UpgradeService.class));
-        }
     }
 
     public static class MainActivityHandler extends Handler {
@@ -241,30 +200,6 @@ public class MainPresenter {
     }
 
     private void Init() {
-        //注册监听广播
-        if (receiver == null) {
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction() != null) {
-                        if (intent.getAction().equals("edu.gdei.gdeiassistant.PATCH_RELAUNCH")) {
-                            //显示补丁冷启动提示
-                            mainActivity.ShowPatchRelaunchTip();
-                        } else if (intent.getAction().equals("edu.gdei.gdeiassistant.CHECK_UPGRADE")) {
-                            String versionCodeName = intent.getStringExtra("VersionCodeName");
-                            String versionInfo = intent.getStringExtra("VersionInfo");
-                            String downloadURL = intent.getStringExtra("DownloadURL");
-                            String fileSize = intent.getStringExtra("FileSize");
-                            //显示更新提示
-                            mainActivity.ShowUpgradeTip(versionCodeName, versionInfo, downloadURL, fileSize);
-                        }
-                    }
-                }
-            };
-            //注册广播监听
-            mainActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.PATCH_RELAUNCH"));
-            mainActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.CHECK_UPGRADE"));
-        }
         //加载用户权限列表信息
         GetUserAccess();
     }
@@ -331,13 +266,6 @@ public class MainPresenter {
         } catch (Exception ignored) {
 
         }
-    }
-
-    /**
-     * 结束应用程序使补丁生效
-     */
-    public void PatchRelaunchAndStopProcess() {
-        SophixManager.getInstance().killProcessSafely();
     }
 
     /**

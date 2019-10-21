@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:name=".Application.SophixStubApplication"
+        android:name=".Application.GdeiAssistantApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -21,24 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <meta-data
-            android:name="com.taobao.android.hotfix.IDSECRET"
-            android:value="@string/hotfix_app_key" />
-        <meta-data
-            android:name="com.taobao.android.hotfix.APPSECRET"
-            android:value="@string/hotfix_app_secret" />
-        <meta-data
-            android:name="com.taobao.android.hotfix.RSASECRET"
-            android:value="@string/hotfix_rsa" />
-
-        <service
-            android:name=".Service.UpgradeService"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".Service.PatchService"
-            android:enabled="true"
-            android:exported="true" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

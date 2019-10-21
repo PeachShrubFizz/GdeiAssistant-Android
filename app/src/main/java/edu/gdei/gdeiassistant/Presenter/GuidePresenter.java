@@ -1,16 +1,9 @@
 package edu.gdei.gdeiassistant.Presenter;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
-import com.taobao.sophix.SophixManager;
 
 import java.lang.ref.WeakReference;
 
@@ -18,12 +11,8 @@ import edu.gdei.gdeiassistant.Activity.GuideActivity;
 import edu.gdei.gdeiassistant.Activity.LoginActivity;
 import edu.gdei.gdeiassistant.Activity.MainActivity;
 import edu.gdei.gdeiassistant.Application.GdeiAssistantApplication;
-import edu.gdei.gdeiassistant.Constant.ActivityRequestCodeConstant;
 import edu.gdei.gdeiassistant.Constant.RequestConstant;
 import edu.gdei.gdeiassistant.Model.GuideModel;
-import edu.gdei.gdeiassistant.Service.PatchService;
-import edu.gdei.gdeiassistant.Service.UpgradeService;
-import edu.gdei.gdeiassistant.Tools.NetWorkUtils;
 import edu.gdei.gdeiassistant.Tools.StringUtils;
 import edu.gdei.gdeiassistant.Tools.TokenUtils;
 
@@ -32,8 +21,6 @@ public class GuidePresenter {
     private GuideActivity guideActivity;
 
     private GuideModel guideModel;
-
-    private BroadcastReceiver receiver;
 
     private GuideActivityHandler guideActivityHandler;
 
@@ -103,48 +90,6 @@ public class GuidePresenter {
     }
 
     private void Init() {
-        //注册监听广播
-        if (receiver == null) {
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction() != null) {
-                        if (intent.getAction().equals("edu.gdei.gdeiassistant.PATCH_RELAUNCH")) {
-                            //显示补丁冷启动提示
-                            guideActivity.ShowPatchRelaunchTip();
-                            //停止延时跳转，处理补丁冷启动任务
-                            delayHandler.removeCallbacksAndMessages(null);
-                        } else if (intent.getAction().equals("edu.gdei.gdeiassistant.CHECK_UPGRADE")) {
-                            //停止延时跳转，处理应用更新任务
-                            delayHandler.removeCallbacksAndMessages(null);
-                            String versionCodeName = intent.getStringExtra("VersionCodeName");
-                            String versionInfo = intent.getStringExtra("VersionInfo");
-                            String downloadURL = intent.getStringExtra("DownloadURL");
-                            String fileSize = intent.getStringExtra("FileSize");
-                            //显示更新提示
-                            guideActivity.ShowUpgradeTip(versionCodeName, versionInfo, downloadURL, fileSize);
-                        }
-                    }
-                }
-            };
-            //注册广播监听
-            guideActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.PATCH_RELAUNCH"));
-            guideActivity.registerReceiver(receiver, new IntentFilter("edu.gdei.gdeiassistant.CHECK_UPGRADE"));
-        }
-        //WIFI状态下启动检测更新服务
-        if (NetWorkUtils.IsUsingWifi(guideActivity.getApplicationContext())) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                guideActivity.startForegroundService(new Intent(guideActivity, UpgradeService.class));
-            } else {
-                guideActivity.startService(new Intent(guideActivity, UpgradeService.class));
-            }
-        }
-        //启动补丁更新服务
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            guideActivity.startForegroundService(new Intent(guideActivity, PatchService.class));
-        } else {
-            guideActivity.startService(new Intent(guideActivity, PatchService.class));
-        }
         //检查用户登录状态
         String token = TokenUtils.GetUserAccessToken(guideActivity.getApplicationContext());
         if (StringUtils.isNotBlank(token)) {
@@ -187,27 +132,6 @@ public class GuidePresenter {
     }
 
     /**
-     * 注销广播
-     */
-    public void UnregisterReceiver() {
-        if (receiver != null) {
-            guideActivity.unregisterReceiver(receiver);
-        }
-    }
-
-    /**
-     * 下载新版本
-     */
-    public void DownLoadNewVersion(String downloadURL) {
-        //使用浏览器下载新版本应用，并接收返回结果
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.VIEW");
-        intent.setData(Uri.parse(downloadURL));
-        intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-        guideActivity.startActivityForResult(Intent.createChooser(intent, "请选择浏览器"), ActivityRequestCodeConstant.BROWSER_UPDATE_REQUEST_CODE);
-    }
-
-    /**
      * 处理完更新提示信息后，进行页面的跳转
      */
     public void SwitchPageAfterHandledUpdateTip() {
@@ -231,13 +155,6 @@ public class GuidePresenter {
             guideActivity.startActivity(new Intent(guideActivity, LoginActivity.class));
             guideActivity.finish();
         }
-    }
-
-    /**
-     * 结束应用程序使补丁生效
-     */
-    public void PatchRelaunchAndStopProcess() {
-        SophixManager.getInstance().killProcessSafely();
     }
 
     /**

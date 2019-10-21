@@ -8,8 +8,6 @@ public class NetWorkTimeoutConstant {
 
     public static final int CHARGE_NETWORK_TIMEOUT = 15;
 
-    public static final int CHECK_UPGRADE_NETWORK_TIMEOUT = 3;
-
     public static final int ENCRYPT_NETWORK_TIMEOUT = 3;
 
     public static final int EVALUATE_NETWORK_TIMEOUT = 15;
