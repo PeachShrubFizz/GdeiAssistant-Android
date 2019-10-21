@@ -12,11 +12,6 @@
     <!-- 请求令牌，该默认值为生产环境供开发者体验预览的令牌值 -->
     <string name="request_validate_token_template">GdeiAssistantRequest</string>
 
-    <!-- 安卓移动热修复应用配置信息 -->
-    <string name="hotfix_app_key_template"></string>
-    <string name="hotfix_app_secret_template"></string>
-    <string name="hotfix_rsa_template"></string>
-
     <!-- HTTPDNS配置信息 -->
     <string name="httpdns_account_id_template"></string>
     <string name="httpdns_secret_key_template"></string>
